@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kuis Pancasila Level 20</title>
+<style>
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    transition: background 1s ease;
+}
+.container {
+    background: white;
+    padding: 30px 40px;
+    border-radius: 15px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    text-align: center;
+    width: 90%;
+    max-width: 650px;
+    position: relative;
+    overflow: hidden;
+}
+h1 { color: #ff7f50; margin-bottom: 20px; }
+
+/* Karakter Pahlawan */
+#character {
+    width: 100px;
+    height: 100px;
+    position: absolute;
+    top: -50px;
+    right: 20px;
+    transition: all 0.5s ease;
+}
+.character-happy { transform: translateY(-10px) scale(1.1); animation: jump 0.6s ease-in-out; }
+.character-sad { transform: translateY(10px) scale(0.9); animation: shake 0.5s ease-in-out; }
+.character-walk { transform: translateY(0) scale(1); animation: walk 0.5s ease-in-out; }
+
+@keyframes jump {0% { transform: translateY(0); } 50% { transform: translateY(-30px) scale(1.2); } 100% { transform: translateY(0) scale(1.1); }}
+@keyframes shake {0% { transform: translateX(0); } 25% { transform: translateX(-10px); } 50% { transform: translateX(10px); } 75% { transform: translateX(-10px); } 100% { transform: translateX(0); }}
+@keyframes walk {0% { transform: translateX(-50px); opacity:0; } 100% { transform: translateX(0); opacity:1; }}
+
+/* Tombol & animasi jawaban */
+.btn {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 12px;
+    background-color: #ff7f50;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: transform 0.3s, background 0.3s;
+}
+.btn:hover { transform: scale(1.1); background-color: #ff5722; }
+.btn.correct { background-color: #4caf50 !important; animation: pulse 0.3s; }
+.btn.wrong { background-color: #f44336 !important; animation: pulse 0.3s; }
+@keyframes pulse { 0%{transform:scale(1);}50%{transform:scale(1.15);}100%{transform:scale(1);} }
+
+.btn-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 20px; }
+
+/* Soal & fade animasi */
+#question-container { transition: all 0.5s ease-in-out; }
+.fade-out { opacity: 0; transform: translateX(-50px); }
+.fade-in { opacity: 1; transform: translateX(0); }
+
+/* Progress Bar */
+.progress-container { width: 100%; background-color: #eee; border-radius: 10px; margin-bottom: 20px; }
+.progress-bar { width: 0%; height: 15px; background-color: #ff7f50; border-radius: 10px; transition: width 0.5s ease-in-out; }
+
+/* Confetti */
+.confetti { position: fixed; width: 10px; height: 10px; background-color: gold; top: -10px; animation: fall 3s linear forwards; z-index: 9999; border-radius:50%; }
+@keyframes fall { to { transform: translateY(100vh) rotate(360deg); opacity:0;} }
+
+/* Responsif */
+@media screen and (max-width:600px){
+.container {padding:20px; width:95%;}
+h1{font-size:1.5rem;}
+.btn{font-size:16px;padding:12px 10px;}
+.btn-grid{grid-template-columns:1fr;gap:10px;}
+.progress-bar{height:12px;}
+}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>Kuis Pancasila Level 20</h1>
+<img id="character" src="https://i.ibb.co/0Vb7C9K/pahlawan.png" alt="Pahlawan">
+
+<div class="progress-container">
+    <div class="progress-bar" id="progress-bar"></div>
+</div>
+
+<div id="quiz">
+    <div id="question-container">
+        <div id="question"></div>
+        <div id="answer-buttons" class="btn-grid"></div>
+    </div>
+    <button id="next-btn" class="btn hide">Next</button>
+</div>
+
+<div id="result" class="hide">
+    <h2>Skormu: <span id="score"></span>/20</h2>
+    <button onclick="restartQuiz()" class="btn">Main Lagi</button>
+</div>
+<div id="confetti-container"></div>
+</div>
+
+<script>
+// 20 pertanyaan lengkap
+const questions = [
+{q:"Sila pertama Pancasila adalah...",a:"Ketuhanan Yang Maha Esa",o:["Kemanusiaan","Ketuhanan Yang Maha Esa","Persatuan Indonesia","Kerakyatan"]},
+{q:"Lambang sila pertama adalah...",a:"Bintang",o:["Bintang","Rantai","Pohon Beringin","Kepala Banteng"]},
+{q:"Sila kedua berbunyi...",a:"Kemanusiaan yang Adil dan Beradab",o:["Persatuan","Kemanusiaan yang Adil dan Beradab","Kerakyatan","Keadilan Sosial"]},
+{q:"Lambang sila kedua adalah...",a:"Rantai",o:["Bintang","Rantai","Pohon Beringin","Kepala Banteng"]},
+{q:"Sila ketiga berbunyi...",a:"Persatuan Indonesia",o:["Ketuhanan","Persatuan Indonesia","Kerakyatan","Keadilan Sosial"]},
+{q:"Lambang sila ketiga adalah...",a:"Pohon Beringin",o:["Bintang","Rantai","Pohon Beringin","Kepala Banteng"]},
+{q:"Sila keempat berbunyi...",a:"Kerakyatan yang Dipimpin oleh Hikmat Kebijaksanaan dalam Permusyawaratan/Perwakilan",o:["Kerakyatan yang Dipimpin oleh Hikmat Kebijaksanaan dalam Permusyawaratan/Perwakilan","Ketuhanan","Kemanusiaan","Persatuan"]},
+{q:"Lambang sila keempat adalah...",a:"Kepala Banteng",o:["Bintang","Rantai","Pohon Beringin","Kepala Banteng"]},
+{q:"Sila kelima berbunyi...",a:"Keadilan Sosial bagi Seluruh Rakyat Indonesia",o:["Persatuan","Keadilan Sosial bagi Seluruh Rakyat Indonesia","Kemanusiaan","Kerakyatan"]},
+{q:"Lambang sila kelima adalah...",a:"Padi dan Kapas",o:["Bintang","Rantai","Padi dan Kapas","Kepala Banteng"]},
+{q:"Makna sila pertama adalah...",a:"Mengakui adanya Tuhan",o:["Mengakui adanya Tuhan","Menghormati manusia","Menjaga persatuan","Mewujudkan keadilan"]},
+{q:"Makna sila kedua adalah...",a:"Menghormati hak asasi manusia",o:["Menghormati hak asasi manusia","Mengakui Tuhan","Menjaga persatuan","Mewujudkan keadilan sosial"]},
+{q:"Makna sila ketiga adalah...",a:"Memperkuat persatuan bangsa",o:["Menghormati manusia","Mewujudkan keadilan","Memperkuat persatuan bangsa","Mematuhi pemerintah"]},
+{q:"Makna sila keempat adalah...",a:"Musyawarah untuk mufakat",o:["Musyawarah untuk mufakat","Menghormati manusia","Mewujudkan persatuan","Mengakui Tuhan"]},
+{q:"Makna sila kelima adalah...",a:"Mewujudkan kesejahteraan sosial",o:["Mewujudkan kesejahteraan sosial","Menghormati manusia","Memperkuat persatuan","Mengakui Tuhan"]},
+{q:"Siapa yang merumuskan Pancasila?",a:"Ir. Soekarno",o:["Ir. Soekarno","Mohammad Hatta","Ki Hajar Dewantara","Jenderal Sudirman"]},
+{q:"Tanggal lahir Pancasila adalah...",a:"1 Juni 1945",o:["1 Juni 1945","17 Agustus 1945","10 November 1945","5 Juli 1945"]},
+{q:"Pancasila menjadi dasar negara Indonesia sejak...",a:"18 Agustus 1945",o:["18 Agustus 1945","17 Agustus 1945","1 Juni 1945","5 Juli 1945"]},
+{q:"Jumlah sila dalam Pancasila adalah...",a:"5",o:["5","4","6","3"]},
+{q:"Pancasila bersifat...",a:"Falsafah dan Pandangan Hidup Bangsa",o:["Falsafah dan Pandangan Hidup Bangsa","Hukum Semata","Agama","Politik Semata"]}
+];
+
+const questionElement=document.getElementById("question");
+const answerButtons=document.getElementById("answer-buttons");
+const nextButton=document.getElementById("next-btn");
+const quizContainer=document.getElementById("quiz");
+const resultContainer=document.getElementById("result");
+const scoreElement=document.getElementById("score");
+const progressBar=document.getElementById("progress-bar");
+const confettiContainer=document.getElementById("confetti-container");
+const character=document.getElementById("character");
+const bodyContainer=document.body;
+
+const themes=["#ffecd2","#fcb69f","#cfd9df","#a1c4fd","#fbc2eb","#ff9a9e","#f6d365","#fda085","#a1ffce","#d4fc79"];
+let currentQuestionIndex=0; let score=0;
+
+function setTheme(index){ bodyContainer.style.background=`linear-gradient(to right, ${themes[index%themes.length]}, white)`; }
+
+function startQuiz(){ currentQuestionIndex=0; score=0; quizContainer.classList.remove("hide"); resultContainer.classList.add("hide"); nextButton.classList.add("hide"); showQuestion(); character.src="https://i.ibb.co/0Vb7C9K/pahlawan.png"; }
+
+function showQuestion(){
+    resetState();
+    character.className="character-walk";
+    const container=document.getElementById("question-container");
+    container.classList.add("fade-out");
+    setTimeout(()=>{
+        container.classList.remove("fade-out"); container.classList.add("fade-in");
+        let q=questions[currentQuestionIndex]; questionElement.innerText=q.q;
+        q.o.forEach((option,i)=>{
+            const button=document.createElement("button"); button.innerText=option; button.classList.add("btn");
+            button.style.opacity=0; button.style.transform="translateY(20px)";
+            button.addEventListener("click",selectAnswer);
+            answerButtons.appendChild(button);
+            setTimeout(()=>{ button.style.transition="all 0.3s"; button.style.opacity=1; button.style.transform="translateY(0)"; },i*100);
+        });
+        progressBar.style.width=((currentQuestionIndex+1)/questions.length)*100+"%";
+        setTheme(currentQuestionIndex);
+        character.src="https://i.ibb.co/0Vb7C9K/pahlawan.png";
+    },300);
+}
+
+function resetState(){ nextButton.classList.add("hide"); while(answerButtons.firstChild){ answerButtons.removeChild(answerButtons.firstChild);} }
+
+function selectAnswer(e){
+    const selectedBtn=e.target; const correct=questions[currentQuestionIndex].a;
+    if(selectedBtn.innerText===correct){ selectedBtn.classList.add("correct"); score++; character.src="https://i.ibb.co/HX6L0b5/character-happy.png"; character.className="character-happy"; }
+    else{ selectedBtn.classList.add("wrong"); Array.from(answerButtons.children).forEach(btn=>{ if(btn.innerText===correct) btn.classList.add("correct");}); character.src="https://i.ibb.co/3M9y0tB/character-sad.png"; character.className="character-sad"; }
+    Array.from(answerButtons.children).forEach(button=>{ button.disabled=true; });
+    nextButton.classList.remove("hide");
+}
+
+nextButton.addEventListener("click",()=>{
+    currentQuestionIndex++;
+    if(currentQuestionIndex<questions.length){ showQuestion(); }
+    else{ showResult(); }
+});
+
+function showResult(){
+    quizContainer.classList.add("hide"); resultContainer.classList.remove("hide"); scoreElement.innerText=score;
+    if(score===questions.length){ triggerConfetti(); }
+}
+
+function triggerConfetti(){
+    for(let i=0;i<100;i++){
+        const confetti=document.createElement("div"); confetti.classList.add("confetti");
+        confetti.style.left=Math.random()*window.innerWidth+"px";
+        confetti.style.backgroundColor=`hsl(${Math.random()*360},100%,50%)`;
+        confettiContainer.appendChild(confetti);
+        setTimeout(()=>{ confetti.remove(); },3000);
+    }
+}
+
+function restartQuiz(){ startQuiz(); }
+
+startQuiz();
+</script>
+</body>
+</html>
