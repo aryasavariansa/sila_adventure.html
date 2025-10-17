@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kuis Pancasila Level 20</title>
+<title>Kuis Pancasila Level 10</title>
 <style>
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -57,9 +57,21 @@ h1 { color: #ff7f50; margin-bottom: 20px; }
     transition: transform 0.3s, background 0.3s;
 }
 .btn:hover { transform: scale(1.1); background-color: #ff5722; }
-.btn.correct { background-color: #4caf50 !important; animation: pulse 0.3s; }
-.btn.wrong { background-color: #f44336 !important; animation: pulse 0.3s; }
-@keyframes pulse { 0%{transform:scale(1);}50%{transform:scale(1.15);}100%{transform:scale(1);} }
+
+.btn.correct {
+    background-color: #4caf50 !important;
+    animation: pulse 0.4s ease;
+}
+.btn.wrong {
+    background-color: #f44336 !important;
+    animation: pulse 0.4s ease;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); box-shadow: 0 0 0 rgba(0,0,0,0); }
+  50% { transform: scale(1.15); box-shadow: 0 0 15px rgba(0,0,0,0.2); }
+  100% { transform: scale(1); box-shadow: 0 0 0 rgba(0,0,0,0); }
+}
 
 .btn-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 20px; }
 
@@ -88,7 +100,7 @@ h1{font-size:1.5rem;}
 </head>
 <body>
 <div class="container">
-<h1>Kuis Pancasila Level 20</h1>
+<h1>Kuis Pancasila Level 10</h1>
 <img id="character" src="https://i.ibb.co/0Vb7C9K/pahlawan.png" alt="Pahlawan">
 
 <div class="progress-container">
@@ -104,14 +116,13 @@ h1{font-size:1.5rem;}
 </div>
 
 <div id="result" class="hide">
-    <h2>Skormu: <span id="score"></span>/20</h2>
+    <h2>Skormu: <span id="score"></span>/10</h2>
     <button onclick="restartQuiz()" class="btn">Main Lagi</button>
 </div>
 <div id="confetti-container"></div>
 </div>
 
 <script>
-// 20 pertanyaan lengkap
 const questions = [
 {q:"Sila pertama Pancasila adalah...",a:"Ketuhanan Yang Maha Esa",o:["Kemanusiaan","Ketuhanan Yang Maha Esa","Persatuan Indonesia","Kerakyatan"]},
 {q:"Lambang sila pertama adalah...",a:"Bintang",o:["Bintang","Rantai","Pohon Beringin","Kepala Banteng"]},
@@ -122,17 +133,7 @@ const questions = [
 {q:"Sila keempat berbunyi...",a:"Kerakyatan yang Dipimpin oleh Hikmat Kebijaksanaan dalam Permusyawaratan/Perwakilan",o:["Kerakyatan yang Dipimpin oleh Hikmat Kebijaksanaan dalam Permusyawaratan/Perwakilan","Ketuhanan","Kemanusiaan","Persatuan"]},
 {q:"Lambang sila keempat adalah...",a:"Kepala Banteng",o:["Bintang","Rantai","Pohon Beringin","Kepala Banteng"]},
 {q:"Sila kelima berbunyi...",a:"Keadilan Sosial bagi Seluruh Rakyat Indonesia",o:["Persatuan","Keadilan Sosial bagi Seluruh Rakyat Indonesia","Kemanusiaan","Kerakyatan"]},
-{q:"Lambang sila kelima adalah...",a:"Padi dan Kapas",o:["Bintang","Rantai","Padi dan Kapas","Kepala Banteng"]},
-{q:"Makna sila pertama adalah...",a:"Mengakui adanya Tuhan",o:["Mengakui adanya Tuhan","Menghormati manusia","Menjaga persatuan","Mewujudkan keadilan"]},
-{q:"Makna sila kedua adalah...",a:"Menghormati hak asasi manusia",o:["Menghormati hak asasi manusia","Mengakui Tuhan","Menjaga persatuan","Mewujudkan keadilan sosial"]},
-{q:"Makna sila ketiga adalah...",a:"Memperkuat persatuan bangsa",o:["Menghormati manusia","Mewujudkan keadilan","Memperkuat persatuan bangsa","Mematuhi pemerintah"]},
-{q:"Makna sila keempat adalah...",a:"Musyawarah untuk mufakat",o:["Musyawarah untuk mufakat","Menghormati manusia","Mewujudkan persatuan","Mengakui Tuhan"]},
-{q:"Makna sila kelima adalah...",a:"Mewujudkan kesejahteraan sosial",o:["Mewujudkan kesejahteraan sosial","Menghormati manusia","Memperkuat persatuan","Mengakui Tuhan"]},
-{q:"Siapa yang merumuskan Pancasila?",a:"Ir. Soekarno",o:["Ir. Soekarno","Mohammad Hatta","Ki Hajar Dewantara","Jenderal Sudirman"]},
-{q:"Tanggal lahir Pancasila adalah...",a:"1 Juni 1945",o:["1 Juni 1945","17 Agustus 1945","10 November 1945","5 Juli 1945"]},
-{q:"Pancasila menjadi dasar negara Indonesia sejak...",a:"18 Agustus 1945",o:["18 Agustus 1945","17 Agustus 1945","1 Juni 1945","5 Juli 1945"]},
-{q:"Jumlah sila dalam Pancasila adalah...",a:"5",o:["5","4","6","3"]},
-{q:"Pancasila bersifat...",a:"Falsafah dan Pandangan Hidup Bangsa",o:["Falsafah dan Pandangan Hidup Bangsa","Hukum Semata","Agama","Politik Semata"]}
+{q:"Lambang sila kelima adalah...",a:"Padi dan Kapas",o:["Bintang","Rantai","Padi dan Kapas","Kepala Banteng"]}
 ];
 
 const questionElement=document.getElementById("question");
@@ -151,7 +152,14 @@ let currentQuestionIndex=0; let score=0;
 
 function setTheme(index){ bodyContainer.style.background=`linear-gradient(to right, ${themes[index%themes.length]}, white)`; }
 
-function startQuiz(){ currentQuestionIndex=0; score=0; quizContainer.classList.remove("hide"); resultContainer.classList.add("hide"); nextButton.classList.add("hide"); showQuestion(); character.src="https://i.ibb.co/0Vb7C9K/pahlawan.png"; }
+function startQuiz(){
+    currentQuestionIndex=0; score=0;
+    quizContainer.classList.remove("hide");
+    resultContainer.classList.add("hide");
+    nextButton.classList.add("hide");
+    showQuestion();
+    character.src="https://i.ibb.co/0Vb7C9K/pahlawan.png";
+}
 
 function showQuestion(){
     resetState();
@@ -177,9 +185,19 @@ function showQuestion(){
 function resetState(){ nextButton.classList.add("hide"); while(answerButtons.firstChild){ answerButtons.removeChild(answerButtons.firstChild);} }
 
 function selectAnswer(e){
-    const selectedBtn=e.target; const correct=questions[currentQuestionIndex].a;
-    if(selectedBtn.innerText===correct){ selectedBtn.classList.add("correct"); score++; character.src="https://i.ibb.co/HX6L0b5/character-happy.png"; character.className="character-happy"; }
-    else{ selectedBtn.classList.add("wrong"); Array.from(answerButtons.children).forEach(btn=>{ if(btn.innerText===correct) btn.classList.add("correct");}); character.src="https://i.ibb.co/3M9y0tB/character-sad.png"; character.className="character-sad"; }
+    const selectedBtn=e.target;
+    const correct=questions[currentQuestionIndex].a;
+    if(selectedBtn.innerText===correct){
+        selectedBtn.classList.add("correct");
+        score++;
+        character.src="https://i.ibb.co/HX6L0b5/character-happy.png";
+        character.className="character-happy";
+    } else {
+        selectedBtn.classList.add("wrong");
+        Array.from(answerButtons.children).forEach(btn=>{ if(btn.innerText===correct) btn.classList.add("correct");});
+        character.src="https://i.ibb.co/3M9y0tB/character-sad.png";
+        character.className="character-sad";
+    }
     Array.from(answerButtons.children).forEach(button=>{ button.disabled=true; });
     nextButton.classList.remove("hide");
 }
@@ -191,13 +209,16 @@ nextButton.addEventListener("click",()=>{
 });
 
 function showResult(){
-    quizContainer.classList.add("hide"); resultContainer.classList.remove("hide"); scoreElement.innerText=score;
+    quizContainer.classList.add("hide");
+    resultContainer.classList.remove("hide");
+    scoreElement.innerText=score;
     if(score===questions.length){ triggerConfetti(); }
 }
 
 function triggerConfetti(){
-    for(let i=0;i<100;i++){
-        const confetti=document.createElement("div"); confetti.classList.add("confetti");
+    for(let i=0;i<80;i++){
+        const confetti=document.createElement("div");
+        confetti.classList.add("confetti");
         confetti.style.left=Math.random()*window.innerWidth+"px";
         confetti.style.backgroundColor=`hsl(${Math.random()*360},100%,50%)`;
         confettiContainer.appendChild(confetti);
